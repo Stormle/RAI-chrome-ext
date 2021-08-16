@@ -1,0 +1,6 @@
+{
+    "name": "USD to RAI",
+    "version": "1.0",
+    "manifest_version" : 2,
+    "description": "Changes all references of USD to RAI!"
+}
