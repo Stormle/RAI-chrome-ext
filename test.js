@@ -1,32 +1,78 @@
-var testtext = "oh welcome, welcome my friend"
-console.log(testtext.indexOf("welcome"))
+start(3)
 
 
-const text2 = ["We have found 2352.1 gazillionn$USDffrom a vault under the mountain."]
-const text = ["We have found $2999 from a vault under the mountain."]
-var modifiedHTML = ""
-for (let i = 0; i < text.length; i++) {
-    if (text[i].toLowerCase().indexOf("$usd") != -1) {
-        text[i] = replaceText(text[i], "$usd", text[i].toLowerCase().indexOf("$usd"))
-    } else if (text[i].indexOf("$") != -1) { 
-        text[i] = replaceText(text[i].toLowerCase(), "$", text[i].toLowerCase().indexOf("$"))
-    } else if (text[i].indexOf("US Dollar") != -1) {
-        text[i] = replaceText(text[i].toLowerCase(), "US Dollar", text[i].toLowerCase().indexOf("US Dollar"))
-    } else if (text[i].indexOf("usd") != -1) {
-        text[i] = replaceText(text[i].toLowerCase(), "usd", text[i].toLowerCase().indexOf("usd"))
-    } else if (text[i].indexOf("dollars") != -1) {
-        text[i] = replaceText(text[i].toLowerCase(), "dollars", text[i].toLowerCase().indexOf("dollars"))
-    } else if (text[i].indexOf("dollar") != -1) {
-        text[i] = replaceText(text[i].toLowerCase(), "dollar", text[i].toLowerCase().indexOf("dollar"))
-    } else if(text[i].indexOf("¢") != -1){
-        text[i] = replaceText(text[i].toLowerCase(), "¢", text[i].toLowerCase().indexOf("¢"))
-    } else if(text[i].indexOf("cents") != -1){
-        text[i] = replaceText(text[i].toLowerCase(), "cents", text[i].toLowerCase().indexOf("cents"))
-    } else if(text[i].indexOf("cent") != -1){
-        text[i] = replaceText(text[i].toLowerCase(), "cent", text[i].toLowerCase().indexOf("cent"))
+function start(raiPrice) {
+    console.log(raiPrice)
+    const text2 = ["We have found 2352.1 gazillionn$USDffrom a vault under the mountain."]
+    const text = ["Why do apples cost so much? Like honestly if apples cost 1 dollar each then one million apples will cost 1 million dollars!"]
+    var modifiedHTML = ""
+    var allDone = false
+    for (let i = 0; i < text.length; i++) {
+        allDone = false
+        while (!allDone) {
+            if (text[i].toLowerCase().indexOf("$usd") != -1) {
+                
+                if (modifiedHTML != false) {
+                    text[i] = replaceText(text[i], "$usd", text[i].toLowerCase().indexOf("$usd"))
+                }
+            } else if (text[i].indexOf("$") != -1) { 
+                
+                if (modifiedHTML != false) {
+                    text[i] = replaceText(text[i], "$", text[i].toLowerCase().indexOf("$"))
+                }
+            } else if (text[i].indexOf("US Dollar") != -1) {
+                
+                if (modifiedHTML != false) {
+                    text[i] = replaceText(text[i], "US Dollar", text[i].toLowerCase().indexOf("US Dollar"))
+                }
+            } else if (text[i].indexOf("usd") != -1) {
+                
+                if (modifiedHTML != false) {
+                    text[i] = replaceText(text[i], "usd", text[i].toLowerCase().indexOf("usd"))
+                }
+            } else if (text[i].indexOf("dollars") != -1) {
+                
+                if (modifiedHTML != false) {
+                    text[i] = replaceText(text[i], "dollars", text[i].toLowerCase().indexOf("dollars"))
+                }
+            } else if (text[i].indexOf("dollar") != -1) {
+                text[i] = replaceText(text[i], "dollar", text[i].toLowerCase().indexOf("dollar"))
+                if (modifiedHTML != false) {
+                    
+                }
+            } else if(text[i].indexOf("¢") != -1){
+                text[i] = replaceText(text[i], "¢", text[i].toLowerCase().indexOf("¢"))
+                if (modifiedHTML != false) {
+                    
+                }
+            } else if(text[i].indexOf("cents") != -1){
+                text[i] = replaceText(text[i], "cents", text[i].toLowerCase().indexOf("cents"))
+                if (modifiedHTML != false) {
+                    
+                }
+            } else if(text[i].indexOf("cent") != -1){
+                text[i] = replaceText(text[i], "cent", text[i].toLowerCase().indexOf("cent"))
+                if (modifiedHTML != false) {
+                    
+                }
+            }
     }
+    }
+    console.log(text[0])
 }
-console.log(text[0])
+async function getRAIprice() {
+    var getPrice = await fetchRAIprice()
+    return getPrice
+}
+async function fetchRAIprice() {
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd")
+    .then(function (response) {
+      return response.json();
+    })
+    .catch(function (error) {
+      console.log("Error: " + error);
+    });
+}
 
 function replaceText(text, foundString, indexOf) {
     console.log(foundString)
@@ -38,7 +84,6 @@ function replaceText(text, foundString, indexOf) {
     var isFound = false
     var isDone = false
     var i = 0;
-    var isBackwards = false
     var searchBackwards = false
     var charIter
     var foundIndex = 10000
@@ -140,11 +185,11 @@ function replaceText(text, foundString, indexOf) {
                 convertedNumber = convertNumber(foundNumberBackwards, foundString)
                 numberReplaced = replaceTextFromString(pageEnd, convertedNumber.toString(), foundIndexBackwards, foundNumberBackwards.length, true)
                 
-                returnString = pageStart + addStr(numberReplaced, foundIndexBackwards + length, "RAI")
+                returnString = pageStart + addStr(numberReplaced, foundIndexBackwards + convertedNumber.toString().length, " RAI")
             } else {
                 convertedNumber = convertNumber(foundNumber, foundString)
                 numberReplaced = replaceTextFromString(pageStart, convertedNumber.toString(), foundIndex, foundNumber.length, false)
-                returnString = pageStart + "RAI" + numberReplaced
+                returnString = numberReplaced + "RAI" + pageEnd
                 console.log(returnString)
             }
             return returnString
