@@ -5,61 +5,54 @@ function start(raiPrice) {
     console.log(raiPrice)
     const text2 = ["We have found 2352.1 gazillionn$USDffrom a vault under the mountain."]
     const text = ["Why do apples cost so much? Like honestly if apples cost 1 dollar each then one million apples will cost 1 million dollars!"]
+    console.log(raiPrice)
     var modifiedHTML = ""
     var allDone = false
+    var regexp = [/[$]usd/gi,
+    /[$]/gi,
+    /us dollars/gi,
+    /us dollar/gi,
+    /usd/gi,
+    /dollars/gi,
+    /dollar/gi,
+    /[¢]/gi,
+    /cents/gi,
+    / cent /gi];
+    var correspondingString = ["$usd",
+        "$",
+        "us dollars",
+        "us dollar",
+        "usd",
+        "dollars",
+        "dollar",
+        "¢",
+        "cents",
+        "cent"]
     var match, matches = [];
     for (let i = 0; i < text.length; i++) {
-        allDone = false
-        while (!allDone) {
-            if (text[i].toLowerCase().indexOf("$usd") != -1) {
-                regexp = /[$]usd/g;
-                if (modifiedHTML != false) {
-                    text[i] = replaceText(text[i], "$usd", text[i].toLowerCase().indexOf("$usd"))
-                }
-            } else if (text[i].indexOf("$") != -1) { 
+        matches = [];
+        for (let i2 = 0; i2 < regexp.length; i2++) {
+            //some issues with matching
+            while ((match = regexp[i2].exec(text[i])) != null) {
+                matches.push(match.index);
+            }
+            console.log("inner html: " + text[i])
+            console.log("corresponding string: " + correspondingString[i2])
+            for (let i3 = 0; i3 < matches.length; i3++) {
                 
+                console.log("match: " + matches[i3])
+                modifiedHTML = replaceText(text[i], correspondingString[i2], matches[i3])
                 if (modifiedHTML != false) {
-                    text[i] = replaceText(text[i], "$", text[i].toLowerCase().indexOf("$"))
+                    text[i] = modifiedHTML
                 }
-            } else if (text[i].indexOf("US Dollar") != -1) {
-                
-                if (modifiedHTML != false) {
-                    text[i] = replaceText(text[i], "US Dollar", text[i].toLowerCase().indexOf("US Dollar"))
-                }
-            } else if (text[i].indexOf("usd") != -1) {
-                
-                if (modifiedHTML != false) {
-                    text[i] = replaceText(text[i], "usd", text[i].toLowerCase().indexOf("usd"))
-                }
-            } else if (text[i].indexOf("dollars") != -1) {
-                
-                if (modifiedHTML != false) {
-                    text[i] = replaceText(text[i], "dollars", text[i].toLowerCase().indexOf("dollars"))
-                }
-            } else if (text[i].indexOf("dollar") != -1) {
-                text[i] = replaceText(text[i], "dollar", text[i].toLowerCase().indexOf("dollar"))
-                if (modifiedHTML != false) {
-                    
-                }
-            } else if(text[i].indexOf("¢") != -1){
-                text[i] = replaceText(text[i], "¢", text[i].toLowerCase().indexOf("¢"))
-                if (modifiedHTML != false) {
-                    
-                }
-            } else if(text[i].indexOf("cents") != -1){
-                text[i] = replaceText(text[i], "cents", text[i].toLowerCase().indexOf("cents"))
-                if (modifiedHTML != false) {
-                    
-                }
-            } else if(text[i].indexOf("cent") != -1){
-                text[i] = replaceText(text[i], "cent", text[i].toLowerCase().indexOf("cent"))
-                if (modifiedHTML != false) {
-                    
+                //Redo the index search 
+                matches = []
+                while ((match = regexp[i2].exec(text[i].toString())) != null) {
+                    matches.push(match.index);
                 }
             }
+        }
     }
-    }
-    console.log(text[0])
 }
 async function getRAIprice() {
     var getPrice = await fetchRAIprice()

@@ -1,6 +1,7 @@
 const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
 
-
+//Set value at $3 in case the API doesn't work. But it does work.
+var raiPrice = 3
 fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
   .then(
     function(response) {
@@ -12,6 +13,7 @@ fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
 
       // Examine the text in the response
       response.json().then(function(data) {
+        raiPrice = parseFloat(data["rai"]["usd"])
         start(data["rai"]["usd"]);
       });
     }
@@ -21,7 +23,7 @@ fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
   });
 
 
-function start(raiPrice) {
+function start() {
     console.log(raiPrice)
     const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
     var modifiedHTML = ""
@@ -35,7 +37,7 @@ function start(raiPrice) {
     /dollar/gi,
     /[¢]/gi,
     /cents/gi,
-    /cent/gi];
+    / cent /gi];
     var correspondingString = ["$usd",
         "$",
         "us dollars",
@@ -44,20 +46,29 @@ function start(raiPrice) {
         "dollars",
         "dollar",
         "¢",
-        "cents",
-        "cent"]
+        " cents",
+        " cent "]
     var match, matches = [];
     for (let i = 0; i < text.length; i++) {
         matches = [];
         for (let i2 = 0; i2 < regexp.length; i2++) {
             //some issues with matching
-            while ((match = regexp[i2].exec(text[i])) != null) {
+            while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
                 matches.push(match.index);
             }
+            console.log("inner html: " + text[i].innerHTML)
+            console.log("corresponding string: " + correspondingString[i2])
             for (let i3 = 0; i3 < matches.length; i3++) {
-                modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[i3])
+                
+                console.log("match: " + matches[i3])
+                modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
                 if (modifiedHTML != false) {
                     text[i].innerHTML = modifiedHTML
+                }
+                //Redo the index search 
+                matches = []
+                while ((match = regexp[i2].exec(text[i].toString())) != null) {
+                    matches.push(match.index);
                 }
             }
         }
@@ -84,13 +95,13 @@ function replaceText(text, foundString, indexOf) {
             if (pageEnd.length > i) {
                 charIter = pageEnd.charAt(i)
             } else {
-                isdone = true
+                isDone = true
             }
         } else {
-            if (i >= 0) {
+            if (pageStart.length >= i >= 0) {
                 charIter = pageStart.charAt(pageStart.length - i)
             } else {
-                isdone = true
+                isDone = true
             }
             
         }
@@ -111,7 +122,7 @@ function replaceText(text, foundString, indexOf) {
             i++
         } else if (isFound) {
             //Already found valid numbers. Checking if we should go the other way.
-            if (foundString.includes("$") || foundString.toLowerCase() == "usd") {
+            if (foundString.includes("$") || foundString.toLowerCase() == "usd" || foundString == "¢") {
                 if (!searchBackwards) {
                     searchBackwards = true
                     isFound = false
@@ -128,7 +139,7 @@ function replaceText(text, foundString, indexOf) {
             i++
         } else {
             //None found in 20 characters.
-            if (foundString.includes("$") || foundString.toLowerCase() == "usd") {
+            if (foundString.includes("$") || foundString.toLowerCase() == "usd" || foundString == "¢") {
                 if (!searchBackwards) {
                     searchBackwards = true
                     isFound = false
@@ -208,6 +219,7 @@ function replaceTextFromString(input, replacement, index, length, isBackwards) {
     var totalString = start + replacement + end
     return totalString
 }
+
 function convertNumber(inputNumber, foundString) {
     var sanitized = inputNumber
     var typeOfJunk = ""
@@ -223,14 +235,11 @@ function convertNumber(inputNumber, foundString) {
         typeOfJunk = "commas"
     }
 
-    //Get current price from coingecko:
-    var price = 3
-
     var finalNumber = ""
-    if (foundString == "cent" || foundString == "cents" || foundString == "¢") {
-        finalNumber = parseFloat(sanitized) / price / 100
+    if (foundString == " cent " || foundString == " cents" || foundString == "¢") {
+        finalNumber = parseFloat(sanitized) / raiPrice / 100
     } else {
-        finalNumber = parseFloat(sanitized) / price
+        finalNumber = parseFloat(sanitized) / raiPrice
     }
     
     if (finalNumber < 0.1) {

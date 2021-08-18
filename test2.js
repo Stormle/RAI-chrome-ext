@@ -1,4 +1,4 @@
-var regexp = /[$]ab cd/gi;
+var regexp = /[$]/gi;
 var foo = "abc1, $Ab cd, abc3, zxy, abc4";
 var match, matches = [];
 
