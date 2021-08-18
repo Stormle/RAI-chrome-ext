@@ -26,61 +26,42 @@ function start(raiPrice) {
     const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
     var modifiedHTML = ""
     var allDone = false
+    var regexp = [/[$]usd/gi,
+    /[$]/gi,
+    /us dollars/gi,
+    /us dollar/gi,
+    /usd/gi,
+    /dollars/gi,
+    /dollar/gi,
+    /[¢]/gi,
+    /cents/gi,
+    /cent/gi];
+    var correspondingString = ["$usd",
+        "$",
+        "us dollars",
+        "us dollar",
+        "usd",
+        "dollars",
+        "dollar",
+        "¢",
+        "cents",
+        "cent"]
+    var match, matches = [];
     for (let i = 0; i < text.length; i++) {
-        allDone = false
-        while (!allDone) {
-            //https://stackoverflow.com/questions/3365902/search-for-all-instances-of-a-string-inside-a-string
-            if (text[i].innerHTML.toLowerCase().indexOf("$usd") != -1) {
-                modifiedHTML = replaceText(text[i].innerHTML, "$usd", text[i].innerHTML.toLowerCase().indexOf("$usd"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if (text[i].innerHTML.indexOf("$") != -1) { 
-                modifiedHTML = replaceText(text[i].innerHTML, "$", text[i].innerHTML.toLowerCase().indexOf("$"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if (text[i].innerHTML.toLowerCase().indexOf("us dollar") != -1) {
-                modifiedHTML = replaceText(text[i].innerHTML, "US Dollar", text[i].innerHTML.toLowerCase().indexOf("US Dollar"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if (text[i].innerHTML.toLowerCase().indexOf("usd") != -1) {
-                modifiedHTML = replaceText(text[i].innerHTML, "usd", text[i].innerHTML.toLowerCase().indexOf("usd"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if (text[i].innerHTML.toLowerCase().indexOf("dollars") != -1) {
-                modifiedHTML = replaceText(text[i].innerHTML, "dollars", text[i].innerHTML.toLowerCase().indexOf("dollars"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if (text[i].innerHTML.toLowerCase().indexOf("dollar") != -1) {
-                modifiedHTML = replaceText(text[i].innerHTML, "dollar", text[i].innerHTML.toLowerCase().indexOf("dollar"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if(text[i].innerHTML.toLowerCase().indexOf("¢") != -1){
-                modifiedHTML = replaceText(text[i].innerHTML, "¢", text[i].innerHTML.toLowerCase().indexOf("¢"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if(text[i].innerHTML.toLowerCase().indexOf("cents") != -1){
-                modifiedHTML = replaceText(text[i].innerHTML, "cents", text[i].innerHTML.toLowerCase().indexOf("cents"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else if(text[i].innerHTML.toLowerCase().indexOf("cent") != -1){
-                modifiedHTML = replaceText(text[i].innerHTML, "cent", text[i].innerHTML.toLowerCase().indexOf("cent"))
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
-                }
-            } else {
-                allDone = true
+        matches = [];
+        for (let i2 = 0; i2 < regexp.length; i2++) {
+            //some issues with matching
+            while ((match = regexp[i2].exec(text[i])) != null) {
+                matches.push(match.index);
             }
+            for (let i3 = 0; i3 < matches.length; i3++) {
+                modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[i3])
+                if (modifiedHTML != false) {
+                    text[i].innerHTML = modifiedHTML
+                }
+            }
+        }
     }
-    }
-    console.log(text[0])
 }
 
 function replaceText(text, foundString, indexOf) {
@@ -168,7 +149,7 @@ function replaceText(text, foundString, indexOf) {
         sendBackwardsVariable = true
     } else if (foundIndex == 10000 && foundIndexBackwards == 10000){
         //Nothing was found.
-        return
+        return false
     } else if (foundIndex == foundIndexBackwards){
         //Tie, just send front.
         sendBackwardsVariable = false

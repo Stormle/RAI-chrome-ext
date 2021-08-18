@@ -7,11 +7,12 @@ function start(raiPrice) {
     const text = ["Why do apples cost so much? Like honestly if apples cost 1 dollar each then one million apples will cost 1 million dollars!"]
     var modifiedHTML = ""
     var allDone = false
+    var match, matches = [];
     for (let i = 0; i < text.length; i++) {
         allDone = false
         while (!allDone) {
             if (text[i].toLowerCase().indexOf("$usd") != -1) {
-                
+                regexp = /[$]usd/g;
                 if (modifiedHTML != false) {
                     text[i] = replaceText(text[i], "$usd", text[i].toLowerCase().indexOf("$usd"))
                 }
