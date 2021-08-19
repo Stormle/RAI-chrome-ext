@@ -54,6 +54,7 @@ function start(raiPrice) {
         }
     }
 }
+
 async function getRAIprice() {
     var getPrice = await fetchRAIprice()
     return getPrice

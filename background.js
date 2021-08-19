@@ -19,7 +19,7 @@ fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
     }
   )
   .catch(function(err) {
-    start(3)
+    start()
   });
 
 
@@ -49,6 +49,9 @@ function start() {
         " cents",
         " cent "]
     var match, matches = [];
+    var endTags
+    var content
+    var startTags
     for (let i = 0; i < text.length; i++) {
         matches = [];
         for (let i2 = 0; i2 < regexp.length; i2++) {
@@ -61,9 +64,22 @@ function start() {
             for (let i3 = 0; i3 < matches.length; i3++) {
                 
                 console.log("match: " + matches[i3])
-                modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
-                if (modifiedHTML != false) {
-                    text[i].innerHTML = modifiedHTML
+                var bounds = defineOutOfBounds(text[i].innerHTML)
+                if (bounds === true) {
+                    modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
+                    if (modifiedHTML != false) {
+                        text[i].innerHTML = modifiedHTML
+                    }
+                } else if (bounds === false) {
+                    continue;
+                } else {
+                    endTags = text[i].innerHTML.substring(bounds[1], text[i].innerHTML.length)
+                    content = text[i].innerHTML.substring(bounds[0], bounds[1])
+                    startTags = text[i].innerHTML.substring(0, bounds[0])
+                    modifiedHTML = startTags + replaceText(content, correspondingString[i2], matches[0] - bounds[0]) + endTags
+                    if (modifiedHTML != false) {
+                        text[i].innerHTML = modifiedHTML
+                    }
                 }
                 //Redo the index search 
                 matches = []
@@ -74,6 +90,33 @@ function start() {
         }
     }
 }
+function defineOutOfBounds(inputString) {
+    //Designed to create bounds for staying within tags
+    var regexp = /(<([^>]+)>)/ig
+    var match, matches = [];
+    var lengthList = []
+    while ((match = regexp.exec(inputString)) != null) {
+        matches.push(match.index);
+        lengthList.push(match[0].length)
+    }
+    if (matches.length == 0) {
+        //No tags
+        return true
+    } else if (!isEven(matches.length)) {
+        //Creator of the website has either forgot to close a tag or the whole thing is within a tag
+        return false
+    } else {
+        //Return the border indexes of two middle-most tags
+        return [matches[(matches.length /2) - 1] + lengthList[(lengthList.length / 2) - 1], matches[matches.length / 2]]
+    }
+  }
+
+function isEven(value){
+    if (value%2 == 0)
+        return true;
+    else
+        return false;
+  }
 
 function replaceText(text, foundString, indexOf) {
     console.log(foundString)
@@ -89,6 +132,7 @@ function replaceText(text, foundString, indexOf) {
     var charIter
     var foundIndex = 10000
     var foundIndexBackwards = 10000
+
     while (!isDone) {
         //Get character
         if (searchBackwards) {
@@ -103,7 +147,6 @@ function replaceText(text, foundString, indexOf) {
             } else {
                 isDone = true
             }
-            
         }
         if (charIter == "1" || charIter == "2" || charIter == "3" || charIter == "4" || charIter == "5" || charIter == "6" || charIter == "7" || charIter == "8" || charIter == "9" || charIter == "9" || charIter == "." || charIter == "," || charIter == "0") {
             //Adding found number character
