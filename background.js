@@ -232,7 +232,7 @@ function convertNumber(inputNumber, foundString) {
     var typeOfJunk = ""
     if (inputNumber.charAt(0) == "," || inputNumber.charAt(0) == ".") {
         //Starts with a , or . so we add a zero to fix math
-        sanitized = "0" + sanitized
+        inputNumber = "0" + inputNumber
     }
     if (inputNumber.includes(".") && inputNumber.includes(",")) {
         sanitized = inputNumber.split(',').join("");
@@ -259,7 +259,7 @@ function convertNumber(inputNumber, foundString) {
             }
         }
     }
-    
+
     var finalNumber = ""
     if (foundString == " cent " || foundString == " cents" || foundString == "¢") {
         finalNumber = parseFloat(sanitized) / raiPrice / 100
