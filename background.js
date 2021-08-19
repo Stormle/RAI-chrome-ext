@@ -190,7 +190,14 @@ function replaceText(text, foundString, indexOf) {
             } else {
                 convertedNumber = convertNumber(foundNumber, foundString)
                 numberReplaced = replaceTextFromString(pageStart, convertedNumber.toString(), foundIndex, foundNumber.length, false)
-                returnString = numberReplaced + "RAI" + pageEnd
+                if (foundString.charAt(0) == " " && foundString.charAt(foundString.length - 1)) {
+                    returnString = numberReplaced + " RAI " + pageEnd
+                } else if (foundString.charAt(0) == " "){
+                    returnString = numberReplaced + " RAI" + pageEnd
+                } else {
+                    returnString = numberReplaced + "RAI" + pageEnd
+                }
+                
                 console.log(returnString)
             }
             return returnString
@@ -225,28 +232,49 @@ function convertNumber(inputNumber, foundString) {
     var typeOfJunk = ""
     if (inputNumber.charAt(0) == "," || inputNumber.charAt(0) == ".") {
         //Starts with a , or . so we add a zero to fix math
-        sanitized = "0"
+        sanitized = "0" + sanitized
     }
     if (inputNumber.includes(".") && inputNumber.includes(",")) {
         sanitized = inputNumber.split(',').join("");
         typeOfJunk = "both"
     } else if (inputNumber.includes(",")) {
-        sanitized = inputNumber.split(',').join(".");
-        typeOfJunk = "commas"
+        var regexp = /,/gi
+        var match, matches = [];
+        while ((match = regexp.exec(inputNumber)) != null) {
+            matches.push(match.index);
+        }
+        if (inputNumber.length < 4) {
+            //$1,2
+            sanitized = inputNumber.split(',').join(".");
+            typeOfJunk = "commas"
+        } else {
+            if (matches[matches.length - 1] >= inputNumber.length - 3) {
+                //$100,2
+                sanitized = inputNumber.split(',').join(".");
+                typeOfJunk = "commas"
+            } else {
+                //100,000
+                typeOfJunk = "both"
+                sanitized = inputNumber.replaceAll(',', '')
+            }
+        }
     }
-
+    
     var finalNumber = ""
     if (foundString == " cent " || foundString == " cents" || foundString == "¢") {
         finalNumber = parseFloat(sanitized) / raiPrice / 100
     } else {
         finalNumber = parseFloat(sanitized) / raiPrice
     }
-    
-    if (finalNumber < 0.1) {
-        finalNumber = finalNumber.toFixed(5)
-    } else {
-        finalNumber = finalNumber.toFixed(2)
+    var regexp2 = /./gi
+    var match2, matches2 = [];
+    while ((match2 = regexp2.exec(sanitized)) != null) {
+        matches2.push(match2.index);
     }
+
+    //Add 2 extra decimals to whatever amount there was before. ($2 -> $2.00)   
+    finalNumber = finalNumber.toFixed(sanitized.length - matches2[matches2.length - 1] + 1)
+
     if (typeOfJunk == "both") {
         finalNumber = commaSeparateNumber(finalNumber)
     } else if (typeOfJunk == "commas") {
