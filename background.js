@@ -36,7 +36,8 @@ function start() {
     /dollars/gi,
     /dollar/gi,
     /[¢]/gi,
-    /\b(?:cent|cents)\b/gi];
+    /\b(?:cent)\b/gi,
+    /\b(?:cents)\b/gi];
     var correspondingString = ["$usd",
         "$",
         "us dollars",
@@ -45,8 +46,8 @@ function start() {
         "dollars",
         "dollar",
         "¢",
-        "cents",
-        "cent"]
+        "cent",
+        "cents"]
     var match, matches = [];
     var endTags
     var content
@@ -303,7 +304,7 @@ function convertNumber(inputNumber, foundString) {
     }
 
     var finalNumber = ""
-    if (foundString == " cent " || foundString == " cents" || foundString == "¢") {
+    if (foundString == "cent" || foundString == "cents" || foundString == "¢") {
         finalNumber = parseFloat(sanitized) / raiPrice / 100
     } else {
         finalNumber = parseFloat(sanitized) / raiPrice
