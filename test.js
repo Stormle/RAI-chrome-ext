@@ -16,8 +16,7 @@ function start(raiPrice) {
     /dollars/gi,
     /dollar/gi,
     /[¢]/gi,
-    /cents/gi,
-    / cent /gi];
+    /\b(?:cent|cents)\b/gi];
     var correspondingString = ["$usd",
         "$",
         "us dollars",

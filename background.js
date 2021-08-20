@@ -36,8 +36,7 @@ function start() {
     /dollars/gi,
     /dollar/gi,
     /[¢]/gi,
-    /cents/gi,
-    / cent /gi];
+    /\b(?:cent|cents)\b/gi];
     var correspondingString = ["$usd",
         "$",
         "us dollars",
@@ -46,8 +45,8 @@ function start() {
         "dollars",
         "dollar",
         "¢",
-        " cents",
-        " cent "]
+        "cents",
+        "cent"]
     var match, matches = [];
     var endTags
     var content
