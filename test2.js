@@ -1,4 +1,10 @@
-var inputNumber = "1000,0"
-if (inputNumber.includes(".") && inputNumber.includes(",")) {
-  console.log("worked")
+var ret = returnfalse
+if (typeof ret === 'string') {
+  console.log("string")
+} else {
+  console.log("it was false")
+}
+
+function returnfalse() {
+  return false
 }

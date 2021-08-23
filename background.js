@@ -1,29 +1,27 @@
 const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
 
 //Set value at $3 in case the API doesn't work. But it does work.
-var raiPrice = 3
 fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
   .then(
     function(response) {
       if (response.status !== 200) {
         console.log('Looks like there was a problem. Status Code: ' +
           response.status);
-        start(3)
+      } else {
+          // Examine the text in the response
+        response.json().then(function(data) {
+            raiPrice = parseFloat(data["rai"]["usd"])
+            start(data["rai"]["usd"]);
+          });
       }
-
-      // Examine the text in the response
-      response.json().then(function(data) {
-        raiPrice = parseFloat(data["rai"]["usd"])
-        start(data["rai"]["usd"]);
-      });
     }
   )
   .catch(function(err) {
-    start()
+    console.log(err)
   });
 
 
-function start() {
+async function start() {
     console.log(raiPrice)
     const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
     var modifiedHTML = ""
@@ -67,7 +65,7 @@ function start() {
                 var bounds = defineOutOfBounds(text[i].innerHTML)
                 if (bounds === true) {
                     modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
-                    if (modifiedHTML != false) {
+                    if (typeof modifiedHTML === 'string') {
                         text[i].innerHTML = modifiedHTML
                     }
                 } else if (bounds === false) {
@@ -75,9 +73,10 @@ function start() {
                 } else {
                     endTags = text[i].innerHTML.substring(bounds[1], text[i].innerHTML.length)
                     content = text[i].innerHTML.substring(bounds[0], bounds[1])
+                    content = replaceText(content, correspondingString[i2], matches[0] - bounds[0])
                     startTags = text[i].innerHTML.substring(0, bounds[0])
-                    modifiedHTML = startTags + replaceText(content, correspondingString[i2], matches[0] - bounds[0]) + endTags
-                    if (modifiedHTML != false) {
+                    if (typeof content === 'string') {
+                        modifiedHTML = startTags + content + endTags
                         text[i].innerHTML = modifiedHTML
                     }
                 }
@@ -206,15 +205,37 @@ function replaceText(text, foundString, indexOf) {
     var sendBackwardsVariable
     if (foundIndexBackwards < foundIndex) {
         //Backwards
-        sendBackwardsVariable = true
+        if (foundNumberBackwards.includes("1") || foundNumberBackwards.includes("2") || foundNumberBackwards.includes("3") || foundNumberBackwards.includes("4") || foundNumberBackwards.includes("5") || foundNumberBackwards.includes("6") || foundNumberBackwards.includes("7") || foundNumberBackwards.includes("8") || foundNumberBackwards.includes("9")) {
+            sendBackwardsVariable = true
+        } else if (foundIndex != 10000) {
+            if (foundNumber.includes("1") || foundNumber.includes("2") || foundNumber.includes("3") || foundNumber.includes("4") || foundNumber.includes("5") || foundNumber.includes("6") || foundNumber.includes("7") || foundNumber.includes("8") || foundNumber.includes("9")) {
+                sendBackwardsVariable = false
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }
+
+        
     } else if (foundIndex == 10000 && foundIndexBackwards == 10000){
         //Nothing was found.
         return false
     } else if (foundIndex == foundIndexBackwards){
         //Tie, just send front.
         sendBackwardsVariable = false
-    } else if (foundIndexBackwards > foundIndexBackwards) {
-        sendBackwardsVariable = false
+    } else if (foundIndexBackwards > foundIndex) {
+        if (foundNumber.includes("1") || foundNumber.includes("2") || foundNumber.includes("3") || foundNumber.includes("4") || foundNumber.includes("5") || foundNumber.includes("6") || foundNumber.includes("7") || foundNumber.includes("8") || foundNumber.includes("9")) {
+            sendBackwardsVariable = false
+        } else if (foundIndexBackwards != 10000) {
+            if (foundNumberBackwards.foundNumberBackwards.includes("1") || foundNumberBackwards.includes("2") || foundNumberBackwards.includes("3") || foundNumberBackwards.includes("4") || foundNumberBackwards.includes("5") || foundNumberBackwards.includes("6") || foundNumberBackwards.includes("7") || foundNumberBackwards.includes("8") || foundNumberBackwards.includes("9")) {
+                sendBackwardsVariable = true
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }
     }
 
     if (foundNumber != "" || foundNumberBackwards != "") {
@@ -226,7 +247,12 @@ function replaceText(text, foundString, indexOf) {
         }
         if (actualContent) {
             if (!sendBackwardsVariable){
+                if (foundNumber == "0") {
+                    return false
+                }
                 foundNumber = foundNumber.split("").reverse().join("");
+            } else if (foundNumberBackwards == "0") {
+                return false
             }
             var convertedNumber
             var numberReplaced
