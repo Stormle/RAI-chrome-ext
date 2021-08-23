@@ -139,12 +139,14 @@ function replaceText(text, foundString, indexOf) {
             if (pageEnd.length > i) {
                 charIter = pageEnd.charAt(i)
             } else {
+                charIter = ""
                 isDone = true
             }
         } else {
-            if (pageStart.length >= i >= 0) {
+            if (pageStart.length > i >= 0) {
                 charIter = pageStart.charAt(pageStart.length - i)
             } else {
+                charIter = ""
                 isDone = true
             }
         }
@@ -171,9 +173,11 @@ function replaceText(text, foundString, indexOf) {
                     isFound = false
                     i = 0
                 } else {
+                    charIter = ""
                     isDone = true
                 }
             } else {
+                charIter = ""
                 isDone = true
             }
             
@@ -188,9 +192,11 @@ function replaceText(text, foundString, indexOf) {
                     isFound = false
                     i = 0
                 } else {
+                    charIter = ""
                     isDone = true
                 }
             } else {
+                charIter = ""
                 isDone = true
                 return false
             }

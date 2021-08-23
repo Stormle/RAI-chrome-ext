@@ -1,12 +1,4 @@
-var regexp = /\b(?:cent|cents)\b/gi;
-var foo = "<html>centimeter percent aaa cents cent</html>";
-
-var match, matches = [];
-var lengthlist = []
-
-while ((match = regexp.exec(foo)) != null) {
-  matches.push(match.index);
-  lengthlist.push(match[0].length)
+var inputNumber = "1000,0"
+if (inputNumber.includes(".") && inputNumber.includes(",")) {
+  console.log("worked")
 }
-
-console.log("a")
