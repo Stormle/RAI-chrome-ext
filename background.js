@@ -50,18 +50,22 @@ async function start() {
     var endTags
     var content
     var startTags
+    var stillFinding = true
     for (let i = 0; i < text.length; i++) {
         matches = [];
         for (let i2 = 0; i2 < regexp.length; i2++) {
+            stillFinding = true
             //some issues with matching
             while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
                 matches.push(match.index);
             }
+            if (matches.length == 0) {
+                stillFinding = false
+            }
             console.log("inner html: " + text[i].innerHTML)
             console.log("corresponding string: " + correspondingString[i2])
-            for (let i3 = 0; i3 < matches.length; i3++) {
+            while (stillFinding) {
                 
-                console.log("match: " + matches[i3])
                 var bounds = defineOutOfBounds(text[i].innerHTML)
                 if (bounds === true) {
                     modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
@@ -82,8 +86,11 @@ async function start() {
                 }
                 //Redo the index search 
                 matches = []
-                while ((match = regexp[i2].exec(text[i].toString())) != null) {
+                while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
                     matches.push(match.index);
+                }
+                if (matches.length == 0) {
+                    stillFinding = false
                 }
             }
         }
@@ -348,7 +355,19 @@ function convertNumber(inputNumber, foundString) {
     }
 
     //Add 2 extra decimals to whatever amount there was before. ($2 -> $2.00)   
-    finalNumber = finalNumber.toFixed(sanitized.length - matches2[matches2.length - 1] + 1)
+    var rounded
+    var goodEnough = false
+    var addition = 0
+    while (!goodEnough) {
+        rounded = finalNumber.toFixed(sanitized.length - matches2[matches2.length - 1] + 1 + addition)
+        if (rounded.includes("1") || rounded.includes("2") || rounded.includes("3") || rounded.includes("4") || rounded.includes("5") || rounded.includes("6") || rounded.includes("7") || rounded.includes("8") || rounded.includes("9") ) {
+            finalNumber = rounded
+            goodEnough = true
+        } else {
+            addition++
+        }
+    }
+    
 
     if (typeOfJunk == "both") {
         finalNumber = commaSeparateNumber(finalNumber)
