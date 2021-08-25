@@ -20,7 +20,28 @@ fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
     console.log(err)
   });
 
-
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    if (changeInfo.status == 'complete') {
+        fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
+  .then(
+    function(response) {
+      if (response.status !== 200) {
+        console.log('Looks like there was a problem. Status Code: ' +
+          response.status);
+      } else {
+          // Examine the text in the response
+        response.json().then(function(data) {
+            raiPrice = parseFloat(data["rai"]["usd"])
+            start(data["rai"]["usd"]);
+          });
+      }
+    }
+  )
+  .catch(function(err) {
+    console.log(err)
+  });
+    }
+});
 async function start() {
     console.log(raiPrice)
     const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
@@ -56,7 +77,6 @@ async function start() {
         for (let i2 = 0; i2 < regexp.length; i2++) {
             indexBlock = 0
             stillFinding = true
-            //some issues with matching
             while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
                 matches.push(match.index);
             }
@@ -68,16 +88,16 @@ async function start() {
 
             while (stillFinding) {
                 var bounds = defineOutOfBounds(text[i].innerHTML)
-                if (bounds === true) {
+                if (typeof bounds == "string") {
                     modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
                     if (typeof modifiedHTML === 'string') {
                         text[i].innerHTML = modifiedHTML
                     } else {
                         indexBlock++
                     }
-                } else if (bounds === false) {
-                    continue;
-                } else {
+                } else if (typeof bounds == "boolean") {
+                    indexBlock++
+                } else if (typeof bounds == "object") {
                     endTags = text[i].innerHTML.substring(bounds[1], text[i].innerHTML.length)
                     content = text[i].innerHTML.substring(bounds[0], bounds[1])
                     content = replaceText(content, correspondingString[i2], matches[0] - bounds[0])
@@ -114,7 +134,7 @@ function defineOutOfBounds(inputString) {
     }
     if (matches.length == 0) {
         //No tags
-        return true
+        return "true"
     } else if (!isEven(matches.length)) {
         //Creator of the website has either forgot to close a tag or the whole thing is within a tag
         return false
