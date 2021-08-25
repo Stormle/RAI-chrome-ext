@@ -20,29 +20,8 @@ fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
     console.log(err)
   });
 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status == 'complete') {
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
-  .then(
-    function(response) {
-      if (response.status !== 200) {
-        console.log('Looks like there was a problem. Status Code: ' +
-          response.status);
-      } else {
-          // Examine the text in the response
-        response.json().then(function(data) {
-            raiPrice = parseFloat(data["rai"]["usd"])
-            start(data["rai"]["usd"]);
-          });
-      }
-    }
-  )
-  .catch(function(err) {
-    console.log(err)
-  });
-    }
-});
-async function start() {
+
+function start() {
     console.log(raiPrice)
     const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
     var modifiedHTML = ""
@@ -77,20 +56,31 @@ async function start() {
         for (let i2 = 0; i2 < regexp.length; i2++) {
             indexBlock = 0
             stillFinding = true
-            while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
+            var bounds = defineOutOfBounds(text[i].innerHTML)
+            var textToSearch = ""
+            if (typeof bounds == "boolean") {
+                continue
+            } else if (typeof bounds == "object") {
+                textToSearch = text[i].innerHTML.substring(bounds[0], bounds[1])
+            } else {
+                textToSearch = text[i].innerHTML
+            }
+            while ((match = regexp[i2].exec(textToSearch)) != null) {
                 matches.push(match.index);
             }
             if (matches.length == 0) {
                 stillFinding = false
             }
-            console.log("inner html: " + text[i].innerHTML)
+            console.log("inner html: " + textToSearch)
             console.log("corresponding string: " + correspondingString[i2])
 
             while (stillFinding) {
-                var bounds = defineOutOfBounds(text[i].innerHTML)
                 if (typeof bounds == "string") {
                     modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
                     if (typeof modifiedHTML === 'string') {
+                        if (modifiedHTML.includes("RAI RAI")) {
+                            console.log("here")
+                        }
                         text[i].innerHTML = modifiedHTML
                     } else {
                         indexBlock++
@@ -98,24 +88,36 @@ async function start() {
                 } else if (typeof bounds == "boolean") {
                     indexBlock++
                 } else if (typeof bounds == "object") {
-                    endTags = text[i].innerHTML.substring(bounds[1], text[i].innerHTML.length)
-                    content = text[i].innerHTML.substring(bounds[0], bounds[1])
-                    content = replaceText(content, correspondingString[i2], matches[0] - bounds[0])
+                    endTags = text[i].innerHTML.substring(bounds[1], text[i].innerHTML.length)                    
+                    content = replaceText(textToSearch, correspondingString[i2], matches[0])
                     startTags = text[i].innerHTML.substring(0, bounds[0])
                     if (typeof content === 'string') {
                         modifiedHTML = startTags + content + endTags
+                        if (modifiedHTML.includes("RAI RAI")) {
+                            console.log("here")
+                        }
                         text[i].innerHTML = modifiedHTML
                     } else {
                         indexBlock++
                     }
                 }
+                if (typeof bounds == "object") {
+                    textToSearch = text[i].innerHTML.substring(bounds[0], bounds[1])
+                } else {
+                    textToSearch = text[i].innerHTML
+                }
+
                 //Redo the index search 
                 matches = []
-                while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
-                    if (match.index >= indexBlock) {
+                var skipcounter = 0
+                while ((match = regexp[i2].exec(textToSearch)) != null) {
+                    if (skipcounter >= indexBlock) {
                         matches.push(match.index);
+                    } else {
+                        skipcounter++
                     }
                 }
+                skipcounter = 0
                 if (matches.length == 0) {
                     stillFinding = false
                 }
@@ -169,14 +171,14 @@ function replaceText(text, foundString, indexOf) {
     while (!isDone) {
         //Get character
         if (searchBackwards) {
-            if (pageEnd.length > i) {
+            if (pageEnd.length > i && pageEnd.length > 0) {
                 charIter = pageEnd.charAt(i)
             } else {
                 charIter = ""
                 isDone = true
             }
         } else {
-            if (pageStart.length > i >= 0) {
+            if (pageStart.length > i >= 0 && pageStart.length > 0) {
                 charIter = pageStart.charAt(pageStart.length - i)
             } else {
                 charIter = ""
@@ -293,11 +295,17 @@ function replaceText(text, foundString, indexOf) {
             var returnString = ""
             if (sendBackwardsVariable) {
                 convertedNumber = convertNumber(foundNumberBackwards, foundString)
+                if (typeof convertedNumber == "boolean") {
+                    return false
+                }
                 numberReplaced = replaceTextFromString(pageEnd, convertedNumber.toString(), foundIndexBackwards, foundNumberBackwards.length, true)
                 
                 returnString = pageStart + addStr(numberReplaced, foundIndexBackwards + convertedNumber.toString().length, " RAI")
             } else {
                 convertedNumber = convertNumber(foundNumber, foundString)
+                if (typeof convertedNumber == "boolean") {
+                    return false
+                }
                 numberReplaced = replaceTextFromString(pageStart, convertedNumber.toString(), foundIndex, foundNumber.length, false)
                 if (foundString.charAt(0) == " " && foundString.charAt(foundString.length - 1)) {
                     returnString = numberReplaced + " RAI " + pageEnd
@@ -392,6 +400,9 @@ function convertNumber(inputNumber, foundString) {
             goodEnough = true
         } else {
             addition++
+            if (addition > 30) {
+                return false
+            }
         }
     }
     
