@@ -25,7 +25,6 @@ async function start() {
     console.log(raiPrice)
     const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
     var modifiedHTML = ""
-    var allDone = false
     var regexp = [/[$]usd/gi,
     /[$]/gi,
     /us dollars/gi,
@@ -51,9 +50,11 @@ async function start() {
     var content
     var startTags
     var stillFinding = true
+    var indexBlock = 0
     for (let i = 0; i < text.length; i++) {
         matches = [];
         for (let i2 = 0; i2 < regexp.length; i2++) {
+            indexBlock = 0
             stillFinding = true
             //some issues with matching
             while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
@@ -64,13 +65,15 @@ async function start() {
             }
             console.log("inner html: " + text[i].innerHTML)
             console.log("corresponding string: " + correspondingString[i2])
+
             while (stillFinding) {
-                
                 var bounds = defineOutOfBounds(text[i].innerHTML)
                 if (bounds === true) {
                     modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
                     if (typeof modifiedHTML === 'string') {
                         text[i].innerHTML = modifiedHTML
+                    } else {
+                        indexBlock++
                     }
                 } else if (bounds === false) {
                     continue;
@@ -82,12 +85,16 @@ async function start() {
                     if (typeof content === 'string') {
                         modifiedHTML = startTags + content + endTags
                         text[i].innerHTML = modifiedHTML
+                    } else {
+                        indexBlock++
                     }
                 }
                 //Redo the index search 
                 matches = []
                 while ((match = regexp[i2].exec(text[i].innerHTML.toString())) != null) {
-                    matches.push(match.index);
+                    if (match.index >= indexBlock) {
+                        matches.push(match.index);
+                    }
                 }
                 if (matches.length == 0) {
                     stillFinding = false
