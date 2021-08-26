@@ -56,14 +56,14 @@ function start() {
         for (let i2 = 0; i2 < regexp.length; i2++) {
             indexBlock = 0
             stillFinding = true
-            var bounds = defineOutOfBounds(text[i].innerHTML)
+            var bounds = defineOutOfBounds(text[i].innerText)
             var textToSearch = ""
             if (typeof bounds == "boolean") {
                 continue
             } else if (typeof bounds == "object") {
                 textToSearch = text[i].innerHTML.substring(bounds[0], bounds[1])
             } else {
-                textToSearch = text[i].innerHTML
+                textToSearch = text[i].innerText
             }
             while ((match = regexp[i2].exec(textToSearch)) != null) {
                 matches.push(match.index);
@@ -71,17 +71,24 @@ function start() {
             if (matches.length == 0) {
                 stillFinding = false
             }
-            console.log("inner html: " + textToSearch)
+            console.log("inner text: " + textToSearch)
+            
             console.log("corresponding string: " + correspondingString[i2])
 
             while (stillFinding) {
                 if (typeof bounds == "string") {
-                    modifiedHTML = replaceText(text[i].innerHTML, correspondingString[i2], matches[0])
+                    if (textToSearch.charAt(0) == "$") {
+                        console.log("here")
+                    }
+                    modifiedHTML = replaceText(text[i].innerText, correspondingString[i2], matches[0])
                     if (typeof modifiedHTML === 'string') {
-                        if (modifiedHTML.includes("RAI RAI")) {
+                        if (i == 307) {
                             console.log("here")
                         }
-                        text[i].innerHTML = modifiedHTML
+                        if (modifiedHTML.includes("0.00000000000000000000000000000001")) {
+                            console.log("here")
+                        }
+                        text[i].innerText = modifiedHTML
                     } else {
                         indexBlock++
                     }
@@ -93,7 +100,7 @@ function start() {
                     startTags = text[i].innerHTML.substring(0, bounds[0])
                     if (typeof content === 'string') {
                         modifiedHTML = startTags + content + endTags
-                        if (modifiedHTML.includes("RAI RAI")) {
+                        if (modifiedHTML.includes("0.00000000000000000000000000000001")) {
                             console.log("here")
                         }
                         text[i].innerHTML = modifiedHTML
@@ -125,6 +132,24 @@ function start() {
         }
     }
 }
+
+function validateIfContent(inputString, foundIndex) {
+    var regxp = [/</gi, />/gi]
+    var smallerThan = []
+    var biggerThan = []
+    for (let i = 0; i < regxp.length; i++) {
+        var match = [];
+        while ((match = regexp.exec(inputString)) != null) {
+            if (i == 0) {
+                smallerThan.push(match.index);
+            } else {
+                biggerThan.push(match.index);
+            }
+        }
+    }
+    //CONTINUEHERE LATER
+}
+
 function defineOutOfBounds(inputString) {
     //Designed to create bounds for staying within tags
     var regexp = /(<([^>]+)>)/ig
@@ -173,6 +198,11 @@ function replaceText(text, foundString, indexOf) {
         if (searchBackwards) {
             if (pageEnd.length > i && pageEnd.length > 0) {
                 charIter = pageEnd.charAt(i)
+                if (charIter == "\\") {
+                    //Element changed or someone used backslash in the text between found str and number. Unlikely but that would interupt the number search.
+                    charIter = ""
+                    isDone = true
+                }
             } else {
                 charIter = ""
                 isDone = true
@@ -180,9 +210,23 @@ function replaceText(text, foundString, indexOf) {
         } else {
             if (pageStart.length > i >= 0 && pageStart.length > 0) {
                 charIter = pageStart.charAt(pageStart.length - i)
+                if (charIter == "\\") {
+                    //Element changed or someone used backslash in the text between found str and number. Unlikely but that would interupt the number search.
+                    charIter = ""
+                    if (foundString.includes("$") || foundString.toLowerCase() == "usd" || foundString == "¢") {
+                        searchBackwards = true
+                    } else {
+                        isDone = true
+                    }
+                }
             } else {
                 charIter = ""
-                isDone = true
+                if (foundString.includes("$") || foundString.toLowerCase() == "usd" || foundString == "¢") {
+                    searchBackwards = true
+                } else {
+                    isDone = true
+                }
+                
             }
         }
         if (charIter == "1" || charIter == "2" || charIter == "3" || charIter == "4" || charIter == "5" || charIter == "6" || charIter == "7" || charIter == "8" || charIter == "9" || charIter == "9" || charIter == "." || charIter == "," || charIter == "0") {
