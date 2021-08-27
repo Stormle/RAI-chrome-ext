@@ -1,5 +1,3 @@
-const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
-
 //Set value at $3 in case the API doesn't work. But it does work.
 fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
   .then(
@@ -22,8 +20,9 @@ fetch('https://api.coingecko.com/api/v3/simple/price?ids=rai&vs_currencies=usd')
 
 
 function start() {
+    var textnodes = nativeSelector()
+
     console.log(raiPrice)
-    const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
     var modifiedHTML = ""
     var regexp = [/[$]usd/gi,
     /[$]/gi,
@@ -46,25 +45,15 @@ function start() {
         "cent",
         "cents"]
     var match, matches = [];
-    var endTags
-    var content
-    var startTags
     var stillFinding = true
     var indexBlock = 0
-    for (let i = 0; i < text.length; i++) {
+    for (let i = 0; i < textnodes.length; i++) {
         matches = [];
         for (let i2 = 0; i2 < regexp.length; i2++) {
             indexBlock = 0
             stillFinding = true
-            var bounds = defineOutOfBounds(text[i].innerText)
             var textToSearch = ""
-            if (typeof bounds == "boolean") {
-                continue
-            } else if (typeof bounds == "object") {
-                textToSearch = text[i].innerHTML.substring(bounds[0], bounds[1])
-            } else {
-                textToSearch = text[i].innerText
-            }
+            textToSearch = textnodes[i].nodeValue
             while ((match = regexp[i2].exec(textToSearch)) != null) {
                 matches.push(match.index);
             }
@@ -72,47 +61,20 @@ function start() {
                 stillFinding = false
             }
             console.log("inner text: " + textToSearch)
-            
             console.log("corresponding string: " + correspondingString[i2])
 
             while (stillFinding) {
-                if (typeof bounds == "string") {
-                    if (textToSearch.charAt(0) == "$") {
-                        console.log("here")
-                    }
-                    modifiedHTML = replaceText(text[i].innerText, correspondingString[i2], matches[0])
+                    modifiedHTML = replaceText(textnodes[i].nodeValue, correspondingString[i2], matches[0])
                     if (typeof modifiedHTML === 'string') {
-                        if (i == 307) {
-                            console.log("here")
-                        }
                         if (modifiedHTML.includes("0.00000000000000000000000000000001")) {
                             console.log("here")
                         }
-                        text[i].innerText = modifiedHTML
+                        textnodes[i].nodeValue = modifiedHTML
                     } else {
                         indexBlock++
                     }
-                } else if (typeof bounds == "boolean") {
-                    indexBlock++
-                } else if (typeof bounds == "object") {
-                    endTags = text[i].innerHTML.substring(bounds[1], text[i].innerHTML.length)                    
-                    content = replaceText(textToSearch, correspondingString[i2], matches[0])
-                    startTags = text[i].innerHTML.substring(0, bounds[0])
-                    if (typeof content === 'string') {
-                        modifiedHTML = startTags + content + endTags
-                        if (modifiedHTML.includes("0.00000000000000000000000000000001")) {
-                            console.log("here")
-                        }
-                        text[i].innerHTML = modifiedHTML
-                    } else {
-                        indexBlock++
-                    }
-                }
-                if (typeof bounds == "object") {
-                    textToSearch = text[i].innerHTML.substring(bounds[0], bounds[1])
-                } else {
-                    textToSearch = text[i].innerHTML
-                }
+
+                    textToSearch = textnodes[i].nodeValue
 
                 //Redo the index search 
                 matches = []
@@ -120,6 +82,7 @@ function start() {
                 while ((match = regexp[i2].exec(textToSearch)) != null) {
                     if (skipcounter >= indexBlock) {
                         matches.push(match.index);
+                        break
                     } else {
                         skipcounter++
                     }
@@ -132,51 +95,19 @@ function start() {
         }
     }
 }
-
-function validateIfContent(inputString, foundIndex) {
-    var regxp = [/</gi, />/gi]
-    var smallerThan = []
-    var biggerThan = []
-    for (let i = 0; i < regxp.length; i++) {
-        var match = [];
-        while ((match = regexp.exec(inputString)) != null) {
-            if (i == 0) {
-                smallerThan.push(match.index);
-            } else {
-                biggerThan.push(match.index);
-            }
+function nativeSelector() {
+    var elements = document.querySelectorAll("body, body *");
+    var results = [];
+    var child;
+    for(var i = 0; i < elements.length; i++) {
+        child = elements[i].childNodes[0];
+        if (elements[i].hasChildNodes() && child.nodeType == 3) {
+            results.push(child);
         }
     }
-    //CONTINUEHERE LATER
+    return results;
 }
 
-function defineOutOfBounds(inputString) {
-    //Designed to create bounds for staying within tags
-    var regexp = /(<([^>]+)>)/ig
-    var match, matches = [];
-    var lengthList = []
-    while ((match = regexp.exec(inputString)) != null) {
-        matches.push(match.index);
-        lengthList.push(match[0].length)
-    }
-    if (matches.length == 0) {
-        //No tags
-        return "true"
-    } else if (!isEven(matches.length)) {
-        //Creator of the website has either forgot to close a tag or the whole thing is within a tag
-        return false
-    } else {
-        //Return the border indexes of two middle-most tags
-        return [matches[(matches.length /2) - 1] + lengthList[(lengthList.length / 2) - 1], matches[matches.length / 2]]
-    }
-  }
-
-function isEven(value){
-    if (value%2 == 0)
-        return true;
-    else
-        return false;
-  }
 
 function replaceText(text, foundString, indexOf) {
     console.log(foundString)
@@ -308,7 +239,7 @@ function replaceText(text, foundString, indexOf) {
         if (foundNumber.includes("1") || foundNumber.includes("2") || foundNumber.includes("3") || foundNumber.includes("4") || foundNumber.includes("5") || foundNumber.includes("6") || foundNumber.includes("7") || foundNumber.includes("8") || foundNumber.includes("9")) {
             sendBackwardsVariable = false
         } else if (foundIndexBackwards != 10000) {
-            if (foundNumberBackwards.foundNumberBackwards.includes("1") || foundNumberBackwards.includes("2") || foundNumberBackwards.includes("3") || foundNumberBackwards.includes("4") || foundNumberBackwards.includes("5") || foundNumberBackwards.includes("6") || foundNumberBackwards.includes("7") || foundNumberBackwards.includes("8") || foundNumberBackwards.includes("9")) {
+            if (foundNumberBackwards.includes("1") || foundNumberBackwards.includes("2") || foundNumberBackwards.includes("3") || foundNumberBackwards.includes("4") || foundNumberBackwards.includes("5") || foundNumberBackwards.includes("6") || foundNumberBackwards.includes("7") || foundNumberBackwards.includes("8") || foundNumberBackwards.includes("9")) {
                 sendBackwardsVariable = true
             } else {
                 return false
@@ -351,15 +282,8 @@ function replaceText(text, foundString, indexOf) {
                     return false
                 }
                 numberReplaced = replaceTextFromString(pageStart, convertedNumber.toString(), foundIndex, foundNumber.length, false)
-                if (foundString.charAt(0) == " " && foundString.charAt(foundString.length - 1)) {
-                    returnString = numberReplaced + " RAI " + pageEnd
-                } else if (foundString.charAt(0) == " "){
-                    returnString = numberReplaced + " RAI" + pageEnd
-                } else {
-                    returnString = numberReplaced + "RAI" + pageEnd
-                }
-                
-                console.log(returnString)
+
+                returnString = numberReplaced + "RAI" + pageEnd
             }
             return returnString
         }
