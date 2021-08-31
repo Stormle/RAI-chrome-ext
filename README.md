@@ -15,4 +15,4 @@ chrome://extensions/
 This is a screenshot of test.html at the testhtml folder:
 Notice how the dynamic text search does not get fooled by such mentions as "centimeter" or "percents" even though it supports "cent" and "cents". 
 ![Extension in action](https://github.com/Stormle/RAI-chrome-ext/blob/master/readme-resources/rai-ext-example.png?raw=true)
-DISCLAIMER: The colors are added by me in post to highlight areas of relevance.
+DISCLAIMER: The colors and the before and after boxes at top are added by me in post to highlight areas of relevance and make it more clear. The content is real and the product of a live running version of the extension.
