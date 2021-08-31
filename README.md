@@ -13,6 +13,6 @@ chrome://extensions/
   
 #### Demo:
 This is a screenshot of test.html at the testhtml folder:
-Notice how the dynamic text search does not get fooled by such mentions as "centimeter" or "percents" even though it supports "cent" and "cents".
+Notice how the dynamic text search does not get fooled by such mentions as "centimeter" or "percents" even though it supports "cent" and "cents". 
 ![Extension in action](https://github.com/Stormle/RAI-chrome-ext/blob/master/readme-resources/rai-ext-example.png?raw=true)
-
+DISCLAIMER: The colors are added by me in post to highlight areas of relevance.
