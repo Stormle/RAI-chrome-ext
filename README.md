@@ -1,4 +1,4 @@
-### RAI-chrome-ext
+## RAI-chrome-ext
 
 This Chrome extension will convert all mentions of any USD values to the cryptocurrency RAI. The search happens in a dynamic manner which makes the rules a lot more flexible compared to a basic regex search. Every function contains documentation of what the function does and what variables it passes on to the next function. The format of the original number is also retained. (e.g. $100,000.69 -> 33,333.56 RAI)
 
