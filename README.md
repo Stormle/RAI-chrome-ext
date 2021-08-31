@@ -8,8 +8,9 @@ Child nodes that are classified as text content (nodeType == 3) are selected and
 
 #### How to install the extension?
 chrome://extensions/
--> "Load unpacked"
-  -> select this folder
+-> Enable developer mode
+  -> "Load unpacked"
+    -> select this folder
   
 #### Demo:
 This is a screenshot of test.html at the testhtml folder:
